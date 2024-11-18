@@ -1,0 +1,37 @@
+name: Reusable Docker Build Push
+
+on:
+  workflow_call:
+    inputs:
+      runners:
+        description: The name of the runners for runs-on
+        type: string
+      image:
+        description: The name of the image to build
+        type: string
+
+jobs:
+  docker-build-push:
+    runs-on: ${{ inputs.runners }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Docker Tags
+        id: tags
+        uses: docker/metadata-action@v5
+        with:
+          flavor:
+            latest=true
+          tags: |
+            type=ref,event=branch
+            type=sha
+          images: |
+            "container-registry.k8s.home.blrobinson.uk/${{ inputs.image }}"
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+
