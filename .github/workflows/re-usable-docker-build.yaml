@@ -21,11 +21,11 @@ jobs:
         id: tags
         uses: docker/metadata-action@v5
         with:
-          flavor:
-            latest=true
-          tags: |
-            type=ref,event=branch
-            type=sha
+          # flavor:
+          #   latest=true
+          tags: type=sha
+          # Would like to add these back but limitations elsewhere
+          # type=ref,event=branch
           images: |
             "container-registry.k8s.home.blrobinson.uk/${{ inputs.image }}"
       - name: Build and push
