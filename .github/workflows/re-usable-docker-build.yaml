@@ -9,9 +9,15 @@ on:
       image:
         description: The name of the image to build
         type: string
+    outputs:
+      tags:
+        description: "The Docker Tags we built"
+        value: ${{ jobs.docker-build-push.outputs.tags }}
 
 jobs:
   docker-build-push:
+    outputs:
+      tags: ${{ steps.tags.outputs.tags }}
     runs-on: ${{ inputs.runners }}
     steps:
       - uses: actions/checkout@v4
@@ -34,6 +40,4 @@ jobs:
           context: .
           push: true
           tags: ${{ steps.tags.outputs.tags }}
-    outputs:
-      tags: ${{ steps.tags.outputs.tags }}
 
