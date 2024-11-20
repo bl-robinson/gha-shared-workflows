@@ -1,4 +1,6 @@
 name: Reusable Home Flux Deploy
+# This could probably have been done simpler by just outputting the OLD image+tag from a deploy. Then a 'revert' would just be 'fix-forward' commit the old image tag
+# Would remove logic from 'revert/deploy in here'
 
 on:
   workflow_call:
