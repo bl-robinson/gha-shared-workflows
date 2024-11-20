@@ -18,6 +18,10 @@ on:
       flux-sha:
         description: The SHA of the home-flux repo to look for
         type: string
+      timeout:
+        description: How long to wait for the deployment to stabilise POST kustomization being synced
+        type: string
+        default: 5m
 
 jobs:
   monitor-deploy:
@@ -29,5 +33,5 @@ jobs:
         # I don't really like this line... but it'll do the job... (probably)
         run: timeout 120s sh -c "until kubectl get ks -n ${{ inputs.namespace }} ${{ inputs.kustomization }} -o json | jq '.status.conditions[0].message' | grep 'Applied revision:' | grep '${{ inputs.flux-sha }}'; do echo 'Waiting for Reconciliation...'; sleep 5; done"
       - name: Monitor Deployment
-        run: kubectl rollout status -n ${{ inputs.namespace }} deploy/${{ inputs.deployment-name }} --timeout 5m
+        run: kubectl rollout status -n ${{ inputs.namespace }} deploy/${{ inputs.deployment-name }} --timeout ${{ inputs.timeout }}
 
