@@ -20,7 +20,7 @@ on:
         type: string
 
 jobs:
-  deploy:
+  monitor-deploy:
     runs-on: ${{ inputs.runners }}
     steps:
       - name: Setup Kubectl
