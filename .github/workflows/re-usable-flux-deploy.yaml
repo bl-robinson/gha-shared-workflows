@@ -8,23 +8,11 @@ on:
       old-image:
         description: The old image to deploy (Minus the tag)
         type: string
-      namespace:
-        description: The kubernetes namespace the app is deployed in
-        type: string
-      deployment-name:
-        description: The name of the deployment to watch during deploy
-        type: string
-      kustomization:
-        description: The name of the kustomization to watch during deploy
-        type: string
       runners:
         description: The name of the runners to execute the job on
         type: string
       deploy-image:
         description: The image to deploy (Including the tag)
-        type: string
-      revert-sha:
-        description: The SHA of the commit to revert
         type: string
       flux-file:
         description: The Flux File to edit
@@ -33,6 +21,9 @@ on:
         description: Is this a revert
         type: boolean
         default: false
+      revert-sha:
+        description: The SHA of the commit to revert
+        type: string
     outputs:
       deploy-sha:
         description: "The deployed flux repo sha"
@@ -49,6 +40,7 @@ jobs:
         with:
           repository: bl-robinson/home-flux
           path: flux
+          fetch-depth: 0
       - name: Unset existing github auth
         # This step is needed as GHA auto sets some config which the setup-git action below does not clear. Need to raise an issue there.
         run: git config --unset-all http.https://github.com/.extraheader
@@ -77,11 +69,3 @@ jobs:
       - name: Push Commit
         working-directory: ./flux
         run: git push
-      - name: Setup Kubectl
-        uses: azure/setup-kubectl@v3
-      - name: Wait for Reconcile
-        # I don't really like this line... but it'll do the job... (probably)
-        run: timeout 120s sh -c "until kubectl get ks -n ${{ inputs.namespace }} ${{ inputs.kustomization }} -o json | jq '.status.conditions[0].message' | grep 'Applied revision:' | grep '${{ steps.flux-sha.outputs.FLUX_SHA }}'; do echo 'Waiting for Reconciliation...'; sleep 5; done"
-      - name: Monitor Deployment
-        run: kubectl rollout status -n ${{ inputs.namespace }} deploy/${{ inputs.deployment-name }} --timeout 5m
-
